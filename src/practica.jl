@@ -31,7 +31,8 @@ function loadTrainingDataset(pos::String, neg::String)
     return ([positives; negatives], targets);
 end;
 
-pos = "/home/fuhrerg/GIT/AA/brain_tumor_classification/tumor";
-neg = "/home/fuhrerg/GIT/AA/brain_tumor_classification/no_tumor";
+dir = pwd();
+pos = dir * "/brain_tumor_classification/tumor";
+neg = dir * "/brain_tumor_classification/no_tumor";
 salida = loadTrainingDataset(pos,neg);
 writedlm("salida.data", salida);
