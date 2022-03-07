@@ -1,6 +1,7 @@
 using JLD2
 using Images
 using Statistics
+using DelimitedFiles
 
 function imageToColorArray(image::Array{RGB{Normed{UInt8,8}},2})
     matrix = Array{Float64,2}(undef,1,2)
@@ -33,3 +34,4 @@ end;
 pos = "/home/fuhrerg/GIT/AA/brain_tumor_classification/tumor";
 neg = "/home/fuhrerg/GIT/AA/brain_tumor_classification/no_tumor";
 salida = loadTrainingDataset(pos,neg);
+writedlm("salida.data", salida);
