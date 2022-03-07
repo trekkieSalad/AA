@@ -2,6 +2,8 @@ using JLD2
 using Images
 using Statistics
 using DelimitedFiles
+using CSV
+using DataFrames
 
 function imageToColorArray(image::Array{RGB{Normed{UInt8,8}},2})
     matrix = Array{Float64,2}(undef,1,2)
@@ -25,14 +27,25 @@ function loadFolderImages(folderName::String)
 end;
 
 function loadTrainingDataset(pos::String, neg::String)
+    df = DataFrame(mean = Float64[], std = Float64[]);
+
     positives = loadFolderImages(pos);
     negatives = loadFolderImages(neg);
+    inputs = [positives; negatives];
+
     targets = [trues(length(positives)); falses(length(negatives))];
-    return ([positives; negatives], targets);
+
+    for i = 1:length(inputs)
+        push!(df, (inputs[i][1], inputs[i][2]));
+    end;
+
+    df.target = targets;
+
+    return df;
 end;
 
 dir = pwd();
 pos = dir * "/brain_tumor_classification/tumor";
 neg = dir * "/brain_tumor_classification/no_tumor";
 salida = loadTrainingDataset(pos,neg);
-writedlm("salida.data", salida);
+CSV.write("tumores.csv", salida, header=false);
