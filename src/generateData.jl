@@ -1,10 +1,3 @@
-using JLD2
-using Images
-using Statistics
-using DelimitedFiles
-using CSV
-using DataFrames
-
 function imageToColorArray(image::Array)
     matrix = Array{Float64,2}(undef,1,2)
     matrix[1] = mean(convert(Array{Float64,2}, gray.(Gray.(image))));
@@ -14,7 +7,9 @@ end;
 #imageToColorArray(image::Array{RGBA{Normed{UInt8,8}},2}) = imageToColorArray(RGB.(image));
 
 function withInversion(image::Array{RGB{Normed{UInt8,8}},2})
-    return broadcast(abs, image - reverse(image, dims=2));
+    image=convert(Array{Float64,2}, gray.(Gray.(image)))
+    return broadcast(abs, (image .+ reverse(image, dims=2)).- (reverse(image, dims=1).+ reverse(reverse(image, dims=1), dims=2)));
+    #return convert(Array{Float64,2}, image .> 0.3);
 end;
 
 function loadFolderImages(folderName::String, complex::Bool=false)

@@ -1,7 +1,3 @@
-using Flux
-using Flux.Losses
-using Statistics
-
 function getRNA(num_attributes::Int64, layers_size::Array{Int64,1}, num_classes::Int64)
     rna = Chain();
     rna = Chain(rna..., Dense(num_attributes, layers_size[1], σ));
@@ -21,56 +17,55 @@ function getRNA(num_attributes::Int64, layers_size::Array{Int64,1}, num_classes:
 end;
 
 
-function trainRNA(rnaLayersSize::Array{Int64,1}, inputs::Array{Float64,2}, targets::Array{Bool,2}, maxCycle::Int64, minLoss::Float64=0.0, learningRate::Float64=0.01)
+function trainRNA(rnaLayersSize::Array{Int64,1}, inputs::Array{Array{Float64,2},1}, targets::Array{Array{Bool,2},1}; maxCycle::Int64=1000, earlyStoppingEpochs::Int64=100, minLoss::Float64=0.0, learningRate::Float64=0.01)
     @assert(size(inputs,2) == size(targets, 2));
 
-    (trainIndex, valIndex, testIndex) = holdOut(size(inputs,2), .2, .2);
-    trainInputs = inputs[:, trainIndex];
-    valInputs = inputs[:, valIndex];
-    testInputs = inputs[:, testIndex];
+    trainInputs = inputs[1];
+    valInputs = inputs[2];
+    testInputs = inputs[3];
 
-    trainTargets = targets[:, trainIndex];
-    valTargets = targets[:, valIndex];
-    testTargets = targets[:, testIndex];
+    trainTargets = targets[1];
+    valTargets = targets[2];
+    testTargets = targets[3];
 
-    rna = getRNA(size(inputs,1), rnaLayersSize, size(targets,1));
+    rna = getRNA(size(inputs[1],1), rnaLayersSize, size(targets[1],1));
 
     loss(x,y) = (size(y,1) == 1) ? Losses.binarycrossentropy(rna(x),y) : Losses.crossentropy(rna(x),y);
 
     cycle = 1;
+    earlyStop = 0;
+    lastvaloss = Inf;
     trainingLoss = Float64[];
     testLoss = Float64[];
     validationLoss = Float64[];
+    bestRNA = deepcopy(rna);
 
     
     push!(trainingLoss, loss(trainInputs, trainTargets));
     push!(testLoss, loss(testInputs, testTargets));
     push!(validationLoss, loss(valInputs, valTargets));
 
-    while (cycle < maxCycle && trainingLoss[length(trainingLoss)] > minLoss )
+    while (cycle < maxCycle && trainingLoss[length(trainingLoss)] > minLoss && earlyStop < earlyStoppingEpochs)
         Flux.train!(loss, params(rna), [(trainInputs, trainTargets)], ADAM(learningRate));
+        valoss = loss(valInputs, valTargets)
         push!(trainingLoss, loss(trainInputs, trainTargets));
         push!(testLoss, loss(testInputs, testTargets));
-        push!(validationLoss, loss(valInputs, valTargets));
+        push!(validationLoss, valoss);
+
+        if (valoss < lastvaloss)
+            bestRNA = deepcopy(rna);
+            lastvaloss = valoss;
+            earlyStop = 0;
+        else
+            earlyStop += 1;
+        end;
+
         cycle += 1;        
     end;
-    outputs = rna(inputs);
 
-    println(targetToBool(outputs));
-
-    println("VP: ", getVP(targetToBool(outputs), targets));
-    println("VN: ", getVN(targetToBool(outputs), targets));
-    println("FP: ", getFP(targetToBool(outputs), targets));
-    println("FN: ", getFN(targetToBool(outputs), targets));
-
-    println("Precision: ", accuracy(targetToBool(outputs), targets));
-    println("Ratio de error: ", errorRate(targetToBool(outputs), targets));
-    println("Sensibilidad: ", recall(targetToBool(outputs), targets));
-    println("Especificidad: ", specificity(targetToBool(outputs), targets));
-    println("VPP: ", ppv(targetToBool(outputs), targets));
-    println("VPN: ", npv(targetToBool(outputs), targets));
-    println("F1-SCORE: ", f1(targetToBool(outputs), targets));
+    #println();
+    #println(cycle);
 
 
-    return trainingLoss, testLoss, validationLoss;
+    return trainingLoss, testLoss, validationLoss, bestRNA;
 end;

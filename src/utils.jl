@@ -1,6 +1,3 @@
-using DataFrames
-using CSV
-
 function normalizeInputs(inputs::Array{Float64,2})
     min = minimum(inputs, dims = 2);
     max = maximum(inputs, dims = 2);
@@ -29,3 +26,7 @@ end;
 function outputsFromDataframe( dataframe::DataFrame )
     return Array{Bool,2}(dataframe[:,3]');
 end;
+
+dataFromCSV( name::String ) = dataFromDataframe( dataframeFromCSV( name ) );
+inputsFromCSV( name::String ) = inputsFromDataframe( dataframeFromCSV( name ) );
+outputsFromCSV( name::String ) = outputsFromDataframe( dataframeFromCSV( name ) );

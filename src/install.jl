@@ -1,0 +1,8 @@
+include("dependencies.jl")
+include("generateData.jl")
+include("metrics.jl")
+include("plotData.jl")
+include("RNA.jl")
+include("rnaUtils.jl")
+include("utils.jl")
+include("execute.jl")
