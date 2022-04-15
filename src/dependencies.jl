@@ -9,6 +9,7 @@ Pkg.add("CSV")
 Pkg.add("JLD2")
 Pkg.add("Images")
 Pkg.add("Plots")
+Pkg.add("TerminalMenus")
 
 using Flux
 using Flux.Losses
@@ -22,3 +23,4 @@ using JLD2
 using Images
 #using DelimitedFiles
 using Plots
+using TerminalMenus
