@@ -36,3 +36,49 @@ function plotLossTrain( losses::Tuple )
     Plots.plot!(0:length(losses[1])-1, losses[2], color="blue", label="Test")
     Plots.plot!(0:length(losses[1])-1, losses[3], color="green", label="Validation")
 end;
+
+function plotBests(name1, name2)
+    recall = [];
+    brecall = [];
+    specificity = [];
+    bspecificity = [];
+    open(name1) do f       
+        # read till end of file
+        while ! eof(f) 
+       
+            # read a new / next line for every iteration          
+            s = readline(f)   
+            if startswith(s, "\tRecall:") || startswith(s, "\tSpecificity:")
+                s = split(s, ":");
+                val = parse(Float64, s[2]);
+                if startswith(s[1], "\tRecall")
+                    push!(recall, val);
+                else
+                    push!(specificity, val);
+                end;
+            end
+
+        end       
+    end
+    open(name2) do f       
+        # read till end of file
+        while ! eof(f) 
+       
+            # read a new / next line for every iteration          
+            s = readline(f)   
+            if startswith(s, "\tRecall:") || startswith(s, "\tSpecificity:")
+                s = split(s, ":");
+                val = parse(Float64, s[2]);
+                if startswith(s[1], "\tRecall")
+                    push!(brecall, val);
+                else
+                    push!(bspecificity, val);
+                end;
+            end
+
+        end       
+    end
+
+    Plots.scatter(specificity,recall, color="red", xlabel="Specificity", ylabel="Recall", label="all topologies", legend=:bottomleft, xticks = :all)
+    Plots.scatter!(bspecificity,brecall, color="blue", label="best recall topologies")
+end;
