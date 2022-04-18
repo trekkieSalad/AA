@@ -58,13 +58,13 @@ function trainAllRNA(inputs::Array{Float64,2}, targets::Array{Bool,2}, parameter
     topologies = [];
     for array in rnaLayers
         if (length(rnaLayers) == 1 && array == [-1])
-            for i in 1:2
+            for i in 1:10
                 layer = [i];
                 rnaLayersSize, dataByFold, data = bestRnaWithTopology(layer, inputs, targets, parameters, trainIterations=trainIterations, numFolds=numFolds, maxCycle=maxCycle, earlyStoppingEpochs=earlyStoppingEpochs, minLoss=minLoss, learningRate=learningRate);
                 push!(results, data);
                 push!(resultsByFold, dataByFold);
                 push!(topologies, rnaLayersSize);
-                for j in 1:2
+                for j in 1:10
                     layer = [i, j];
                     rnaLayersSize, dataByFold, data = bestRnaWithTopology(layer, inputs, targets, parameters, trainIterations=trainIterations, numFolds=numFolds, maxCycle=maxCycle, earlyStoppingEpochs=earlyStoppingEpochs, minLoss=minLoss, learningRate=learningRate);
                     push!(results, data);

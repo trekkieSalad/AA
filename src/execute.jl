@@ -121,11 +121,11 @@ function execute()
     topologies = [[-1]]
     metrics = ["Accuracy"]
     eMetrics = ["Accuracy"]
-    iter = 20;
-    folds = 3;
-    early = 100;
+    iter = 50;
+    folds = 10;
+    early = 300;
     ratio = 0.01;
-    maxCycles = 5000;
+    maxCycles = 7000;
 
     for value in sortedSelection
         cabecera();
