@@ -136,7 +136,7 @@ function execute()
             4   => (iter = setIters("Introduzca el numero de iteraciones en cada fold: ", Int64));
             5   => (folds = setIters("Introduzca el numero de subconjuntos para el entrenamiento: ", Int64));
             6   => (early = setIters("Introduzca el numero de ciclos sin mejora antes de parar el entrenamiento: ", Int64));
-            7   => (ratio = setIters("Introduzca el ratio de aprendizaje para el entrenamiento el entrenamiento: ", Float64));
+            7   => (ratio = setIters("Introduzca el ratio de aprendizaje para el entrenamiento: ", Float64));
             8   => (maxCycles = setIters("Introduzca el numero de máximo de ciclos de entrenamiento: ", Int64));
         end;
     end;
