@@ -10,6 +10,7 @@ Pkg.add("JLD2")
 Pkg.add("Images")
 Pkg.add("Plots")
 Pkg.add("TerminalMenus")
+Pkg.add("ScikitLearn")
 
 using Flux
 using Flux.Losses
@@ -24,3 +25,8 @@ using Images
 #using DelimitedFiles
 using Plots
 using TerminalMenus
+using ScikitLearn
+
+@sk_import svm: SVC
+@sk_import tree: DecisionTreeClassifier
+@sk_import neighbors: KNeighborsClassifier

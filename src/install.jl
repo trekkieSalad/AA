@@ -8,5 +8,6 @@ include("RNA.jl")
 include("rnaUtils.jl")
 include("utils.jl")
 include("execute.jl")
+include("otherAlgorithms.jl")
 
 install = true;

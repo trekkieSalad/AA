@@ -26,9 +26,9 @@ function bestRnaWithTopology(rnaLayersSize::Array{Int64,1}, inputs::Array{Float6
     for numFold in 1:numFolds
 
         trainInputs    = inputs[:, crossValidationIndices.!=numFold];
-        testInputs        = inputs[:, crossValidationIndices.==numFold];
+        testInputs     = inputs[:, crossValidationIndices.==numFold];
         trainTargets   = targets[:, crossValidationIndices.!=numFold];
-        testTargets       = targets[:, crossValidationIndices.==numFold];
+        testTargets    = targets[:, crossValidationIndices.==numFold];
 
         metricsInIt = Array{Any,2}(undef, trainIterations, length(parameters));
 
@@ -42,33 +42,92 @@ function bestRnaWithTopology(rnaLayersSize::Array{Int64,1}, inputs::Array{Float6
             (trainLoss, testLoss, valLoss, rna) = trainRNA(rnaLayersSize, newInputs, newTargets, maxCycle=maxCycle, earlyStoppingEpochs=earlyStoppingEpochs, minLoss=minLoss, learningRate=learningRate);
 
             mymetrics = getMetrics(targetToBool(rna(testInputs)), testTargets, parameters);
-            
+
             metricsInIt[iteration,:] = mymetrics;
             next!(p; showvalues= [(:fold, numFold) (:iteracion, iteration)]);
         end;
-        #println(metricsInIt);
         metricsInFold[numFold,:] = mean(metricsInIt, dims=1);
     end;
     metrics = mean(metricsInFold, dims=1);
-    println(metrics);
+    return rnaLayersSize, metricsInFold, metrics;
 end;
 
-function bestRNA(inputs::Array{Float64,2}, targets::Array{Bool,2}, parameters::Array{String, 1}; trainIterations::Int64=50, numFolds::Int64=10, maxCycle::Int64=1000, earlyStoppingEpochs::Int64=100, minLoss::Float64=0.0, learningRate::Float64=0.01, rnaLayers::Array{Array{Int64,1},1}=[[-1]])
-    for array in rnaLayers 
-        println(array)
+function trainAllRNA(inputs::Array{Float64,2}, targets::Array{Bool,2}, parameters::Array{String, 1}; trainIterations::Int64=50, numFolds::Int64=10, maxCycle::Int64=1000, earlyStoppingEpochs::Int64=100, minLoss::Float64=0.0, learningRate::Float64=0.01, rnaLayers::Array{Array{Int64,1},1}=[[-1]])
+    results = Array{Float64,2}[];
+    resultsByFold = [];
+    topologies = [];
+    for array in rnaLayers
         if (length(rnaLayers) == 1 && array == [-1])
-            for i in 1:10
+            for i in 1:2
                 layer = [i];
-                bestRnaWithTopology(layer, inputs, targets, parameters, trainIterations=trainIterations, numFolds=numFolds, maxCycle=maxCycle, earlyStoppingEpochs=earlyStoppingEpochs, minLoss=minLoss, learningRate=learningRate);
-                for j in 1:10
+                rnaLayersSize, dataByFold, data = bestRnaWithTopology(layer, inputs, targets, parameters, trainIterations=trainIterations, numFolds=numFolds, maxCycle=maxCycle, earlyStoppingEpochs=earlyStoppingEpochs, minLoss=minLoss, learningRate=learningRate);
+                push!(results, data);
+                push!(resultsByFold, dataByFold);
+                push!(topologies, rnaLayersSize);
+                for j in 1:2
                     layer = [i, j];
-                    bestRnaWithTopology(layer, inputs, targets, parameters, trainIterations=trainIterations, numFolds=numFolds, maxCycle=maxCycle, earlyStoppingEpochs=earlyStoppingEpochs, minLoss=minLoss, learningRate=learningRate);
+                    rnaLayersSize, dataByFold, data = bestRnaWithTopology(layer, inputs, targets, parameters, trainIterations=trainIterations, numFolds=numFolds, maxCycle=maxCycle, earlyStoppingEpochs=earlyStoppingEpochs, minLoss=minLoss, learningRate=learningRate);
+                    push!(results, data);
+                    push!(resultsByFold, dataByFold);
+                    push!(topologies, rnaLayersSize);
                 end;
             end;
         elseif issubset([0],array)
             println("La topologia introducida no es valida.");
         elseif (length(array) > 0)
-            bestRnaWithTopology(array, inputs, targets, parameters, trainIterations=trainIterations, numFolds=numFolds, maxCycle=maxCycle, earlyStoppingEpochs=earlyStoppingEpochs, minLoss=minLoss, learningRate=learningRate);
+            rnaLayersSize, dataByFold, data = bestRnaWithTopology(array, inputs, targets, parameters, trainIterations=trainIterations, numFolds=numFolds, maxCycle=maxCycle, earlyStoppingEpochs=earlyStoppingEpochs, minLoss=minLoss, learningRate=learningRate);
+
+            push!(results, data);
+            push!(resultsByFold, dataByFold);
+            push!(topologies, rnaLayersSize);
         end;
     end;
+    return topologies, resultsByFold, results;
+end;
+
+function getOrderByMetric(results, metric)
+    tmp = [];
+    for e in results
+        push!(tmp,e[metric]);
+    end;
+    datos = deepcopy(tmp);
+    final = [];
+
+    while length(tmp) > 0
+        toAdd = findmax(tmp)[1];
+        toRem = findmax(tmp)[2];
+        toAddPos = findall(x->x==toAdd, datos)[1]
+        push!(final, toAddPos)
+        deleteat!(tmp, toRem)
+    end;
+    return final;
+end;
+
+
+function getNBests(n::Int64, topologies, resultsByFold, globalResults, eMetrics, metrics)
+    finalTopos = [];
+    finalResultsByFold = [];
+    finalResults = [];
+    tmpOrder = Array{Any,1}(undef, length(eMetrics));
+    i = 1;
+    for el in eMetrics
+        pos = findall(x->x==el, metrics);
+        order = getOrderByMetric(globalResults, pos[1]);
+        
+        tmpOrder = order;
+        i += 1;
+    end;
+
+    i=1;
+    while i <= n && length(tmpOrder) >= i
+
+        push!(finalTopos, topologies[tmpOrder[i]]);
+        push!(finalResults, globalResults[tmpOrder[i]]);
+        if (length(resultsByFold) > 0)
+            push!(finalResultsByFold, resultsByFold[tmpOrder[i]]);
+        end;
+
+        i += 1;
+    end;
+    return finalTopos, finalResultsByFold, finalResults;
 end;
