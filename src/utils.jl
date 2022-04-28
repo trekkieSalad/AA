@@ -15,7 +15,7 @@ end;
 
 function dataFromDataframe( dataframe::DataFrame )
     data = Matrix(dataframe[:,1:2])';
-    return [normalizeInputs(convert(Array{Float64,2}, data)); dataframe[:,3]'];
+    return [normalizeInputs(convert(Array{Float64,2}, data)); dataframe[:,5]'];
 end;
 
 function inputsFromDataframe( dataframe::DataFrame )

@@ -58,14 +58,14 @@ function trainAllRNA(inputs::Array{Float64,2}, targets::Array{Bool,2}, parameter
     topologies = [];
     for array in rnaLayers
         if (length(rnaLayers) == 1 && array == [-1])
-            for i in 1:10
+            for i in 1:8
                 layer = [i];
                 rnaLayersSize, dataByFold, data = bestRnaWithTopology(layer, inputs, targets, parameters, trainIterations=trainIterations, numFolds=numFolds, maxCycle=maxCycle, earlyStoppingEpochs=earlyStoppingEpochs, minLoss=minLoss, learningRate=learningRate);
                 push!(results, data);
                 push!(resultsByFold, dataByFold);
                 push!(topologies, rnaLayersSize);
-                for j in 1:10
-                    layer = [i, j];
+                for j in 0:3
+                    layer = [i, j*2+1];
                     rnaLayersSize, dataByFold, data = bestRnaWithTopology(layer, inputs, targets, parameters, trainIterations=trainIterations, numFolds=numFolds, maxCycle=maxCycle, earlyStoppingEpochs=earlyStoppingEpochs, minLoss=minLoss, learningRate=learningRate);
                     push!(results, data);
                     push!(resultsByFold, dataByFold);
@@ -130,4 +130,59 @@ function getNBests(n::Int64, topologies, resultsByFold, globalResults, eMetrics,
         i += 1;
     end;
     return finalTopos, finalResultsByFold, finalResults;
+end;
+
+function getNBestsFromFile(n::Int64, name::String)
+    recall=[];
+    specificity=[];
+    brecindex=[];
+    bspeciindex=[];
+    bbothindex=[];
+
+    open(name) do f       
+        # read till end of file
+        while ! eof(f) 
+    
+            # read a new / next line for every iteration          
+            s = readline(f)   
+            if startswith(s, "\tRecall:") || startswith(s, "\tSpecificity:")
+                s = split(s, ":");
+                val = parse(Float64, s[2]);
+                if isnan(val)
+                    val = 0;
+                end;
+                if startswith(s[1], "\tRecall")
+                    push!(recall, val);
+                else
+                    push!(specificity, val);
+                end;
+            end
+
+        end       
+    end
+
+    tmprec = deepcopy(recall);
+    tmpspec = deepcopy(specificity);
+
+    i=1;
+    while i <= n && length(recall) >= i
+
+        val = findmax(tmprec)[1];
+        in = findmax(tmprec)[2];
+        push!(brecindex, findall(x->x==val, recall)[1]);
+        deleteat!(tmprec, in);
+
+        val = findmax(tmpspec)[1];
+        in = findmax(tmpspec)[2];
+        push!(bspeciindex, findall(x->x==val, specificity)[1]);
+        deleteat!(tmpspec, in);
+
+        i += 1;
+    end;
+
+    bbothindex = intersect(brecindex, bspeciindex);
+
+    return recall, specificity, brecindex, bspeciindex, bbothindex;
+
+
 end;

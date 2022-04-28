@@ -123,7 +123,7 @@ function execute()
     eMetrics = ["Accuracy"]
     iter = 50;
     folds = 10;
-    early = 300;
+    early = 250;
     ratio = 0.01;
     maxCycles = 7000;
 

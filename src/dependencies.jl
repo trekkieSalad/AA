@@ -11,6 +11,7 @@ Pkg.add("Images")
 Pkg.add("Plots")
 Pkg.add("TerminalMenus")
 Pkg.add("ScikitLearn")
+Pkg.add("ImageMorphology");
 
 using Flux
 using Flux.Losses
