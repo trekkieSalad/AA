@@ -1,11 +1,11 @@
 function imageToColorArray(image::Array)
-    #image2 = withInversion(image);
-    matrix = Array{Float64,2}(undef,1,2)
+    image2 = withInversion(image);
+    matrix = Array{Float64,2}(undef,1,4)
     matrix[1] = mean(convert(Array{Float64,2}, gray.(Gray.(image))));
     matrix[2] = std(convert(Array{Float64,2}, gray.(Gray.(image))));
 
-    #matrix[3] = mean(convert(Array{Float64,2}, gray.(Gray.(image2))));
-    #matrix[4] = std(convert(Array{Float64,2}, gray.(Gray.(image2))));
+    matrix[3] = mean(convert(Array{Float64,2}, gray.(Gray.(image2))));
+    matrix[4] = std(convert(Array{Float64,2}, gray.(Gray.(image2))));
 
     return matrix;
 end;
@@ -26,7 +26,7 @@ function withInversion(image::Array{RGB{Normed{UInt8,8}},2})
     horizontalTotalAdd = broadcast(abs, (image .+ (image .* mayores) .- (1 .- image .* menores)));
     verticalTotalAdd = broadcast(abs, (image .+ (reverse(image, dims=2) .* mayores) .- (1 .- reverse(image, dims=2) .* menores)));
 
-    return horizontalDiference;
+    return verticalDiference;
 end;
 
 function loadFolderImages(folderName::String, complex::Bool=false)
@@ -38,7 +38,7 @@ function loadFolderImages(folderName::String, complex::Bool=false)
             if complex
                 image = withInversion(image);
             end;
-            image = withInversion(image);
+            #image = withInversion(image);
             #@assert(isa(image, Array{RGBA{Normed{UInt8,8}},2}) || isa(image, Array{RGB{Normed{UInt8,8}},2}))
             push!(images, image);
         end;
@@ -47,8 +47,8 @@ function loadFolderImages(folderName::String, complex::Bool=false)
 end;
 
 function loadTrainingDataset(pos::String, neg::String, complex::Bool=false)
-    #df = DataFrame(mean = Float64[], std = Float64[], meanadd = Float64[], stdadd = Float64[]);
-    df = DataFrame(mean = Float64[], std = Float64[]);
+    df = DataFrame(mean = Float64[], std = Float64[], meanadd = Float64[], stdadd = Float64[]);
+    #df = DataFrame(mean = Float64[], std = Float64[]);
 
     positives = loadFolderImages(pos, complex);
     negatives = loadFolderImages(neg, complex);
@@ -57,8 +57,8 @@ function loadTrainingDataset(pos::String, neg::String, complex::Bool=false)
     targets = [trues(length(positives)); falses(length(negatives))];
 
     for i = 1:length(inputs)
-        #push!(df, (inputs[i][1], inputs[i][2], inputs[i][3], inputs[i][4]));
-        push!(df, (inputs[i][1], inputs[i][2]));
+        push!(df, (inputs[i][1], inputs[i][2], inputs[i][3], inputs[i][4]));
+        #push!(df, (inputs[i][1], inputs[i][2]));
     end;
 
     df.target = targets;

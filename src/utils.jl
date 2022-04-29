@@ -14,25 +14,25 @@ function dataframeFromCSV( name::String )
 end;
 
 function dataFromDataframe( dataframe::DataFrame )
-    data = Matrix(dataframe[:,1:2])';
+    data = Matrix(dataframe[:,1:4])';
     return [normalizeInputs(convert(Array{Float64,2}, data)); dataframe[:,5]'];
 end;
 
 function inputsFromDataframe( dataframe::DataFrame )
-    data = Matrix(dataframe[:,1:2])';
+    data = Matrix(dataframe[:,1:4])';
     return normalizeInputs(convert(Array{Float64,2}, data));
 end;
 
 function otherInputsFromDataframe( dataframe::DataFrame )
-    data = Matrix(dataframe[:,1:2]);
+    data = Matrix(dataframe[:,1:4]);
     return data;
 end;
 
 function outputsFromDataframe( dataframe::DataFrame )
-    return Array{Bool,2}(dataframe[:,3]');
+    return Array{Bool,2}(dataframe[:,5]');
 end;
 function otherOutputsFromDataframe( dataframe::DataFrame )
-    return dataframe[:,3];
+    return dataframe[:,5];
 end;
 
 dataFromCSV( name::String ) = dataFromDataframe( dataframeFromCSV( name ) );

@@ -8,8 +8,8 @@ using Images
 ######################################################################################################################
 # Caracteristicas morfologicas de imagenes o partes de imagenes:
 # Cargamos la imagen
-#imagen = load(pwd() * "/ejemplos/gg (1).jpg"); display(imagen);
-imagen = load(pwd() * "/ejemplos/m1(173).jpg"); display(imagen);
+imagen = load(pwd() * "/ejemplos/gg (1).jpg"); display(imagen);
+#imagen = load(pwd() * "/ejemplos/m1(173).jpg"); display(imagen);
 image=convert(Array{Float64,2}, gray.(Gray.(imagen)))
 img_gray = @. Gray(0.8 * Gray.(imagen) > 0.7);
 img_morphograd = morpholaplace(img_gray)
@@ -19,9 +19,9 @@ sleep(2)
 #display(img_morphograd);
 mayores = image .> 0.5;
 menores = image .< 0.5;
-mio = Gray.(normalizeInputs(broadcast(abs, (image .+ (reverse(image, dims=2) .* mayores) .- (1 .- reverse(image, dims=2) .* menores)))));
+#mio = Gray.(normalizeInputs(broadcast(abs, (image .+ (reverse(image, dims=2) .* mayores) .- (1 .- reverse(image, dims=2) .* menores)))));
 #mio = Gray.(normalizeInputs(broadcast(abs, (image .+ (image .* mayores) .- (1 .- image .* menores)))));
-#mio = Gray.(normalizeInputs(broadcast(abs, (image .+ reverse(image, dims=1)))));
+mio = Gray.(normalizeInputs(broadcast(abs, (image .- reverse(image, dims=1)))));
 display(mio);
 
 sleep(2)

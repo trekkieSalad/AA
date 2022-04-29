@@ -64,7 +64,7 @@ function trainAllRNA(inputs::Array{Float64,2}, targets::Array{Bool,2}, parameter
                 push!(results, data);
                 push!(resultsByFold, dataByFold);
                 push!(topologies, rnaLayersSize);
-                for j in 0:3
+                for j in 0:2
                     layer = [i, j*2+1];
                     rnaLayersSize, dataByFold, data = bestRnaWithTopology(layer, inputs, targets, parameters, trainIterations=trainIterations, numFolds=numFolds, maxCycle=maxCycle, earlyStoppingEpochs=earlyStoppingEpochs, minLoss=minLoss, learningRate=learningRate);
                     push!(results, data);
