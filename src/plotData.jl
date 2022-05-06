@@ -22,10 +22,10 @@ function  plotMeanStd( data::Array{Float64,2} )
 
     data
 
-    xt = tumors[:,1]
-    yt = tumors[:,2]
-    xn = no_tumors[:,1]
-    yn = no_tumors[:,2]
+    xt = tumors[:,3]
+    yt = tumors[:,4]
+    xn = no_tumors[:,3]
+    yn = no_tumors[:,4]
     
     Plots.scatter(xt,yt, color="red", label="Tumores", legend=:bottomright,  xlabel="mean", ylabel="std")
     Plots.scatter!(xn,yn, color="blue", label="No Tumores")

@@ -25,6 +25,7 @@ function trainOther(object, inputs, targets, numFolds, met)
         testTargets    = targets[crossValidationIndices.==numFold];
 
         for i in 1:50
+            print(i);
             if object[1] == "svm"
                 model = getSVC(object[2], object[3], object[4], object[5]);
             elseif object[1] == "knn"
@@ -37,6 +38,7 @@ function trainOther(object, inputs, targets, numFolds, met)
             tmpmetrics = getMetrics(Array{Bool,2}(outputs'), Array{Bool,2}(testTargets'), met);
             mymetrics[i,:] = tmpmetrics;
         end;
+        println()
         
         metrics[numFold,:] = mean(mymetrics, dims=1);
     end;
@@ -46,14 +48,18 @@ end;
 function trainSVC(inputs, targets, numFolds, metrics)
     topo = [];
     finals = [];
-    kernels = ["linear", "poly", "rbf", "sigmoid"];
+    kernels = ["linear", "rbf", "sigmoid", "poly"];
     for ker in kernels
         for C in [0.1, 1, 10, 100, 1000]
-            model = ["svm", ker, C, 3., 2];
-            results = trainOther(model, inputs, targets, numFolds, metrics);
-            push!(topo, [ker, C]);
-            push!(finals, results);
-            println(ker * " " * C)
+            if !(ker == "linear" && C == 1000)
+                model = ["svm", ker, C, 45., 2];
+                println(ker)
+                println(C)
+                results = trainOther(model, inputs, targets, numFolds, metrics);
+                push!(topo, [ker, C]);
+                push!(finals, results);
+                println("DONE")
+            end;
         end;
     end;
     return topo, finals;
