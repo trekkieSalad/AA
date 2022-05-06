@@ -48,11 +48,12 @@ function trainSVC(inputs, targets, numFolds, metrics)
     finals = [];
     kernels = ["linear", "poly", "rbf", "sigmoid"];
     for ker in kernels
-        for C in [0.1, 1, 10, 100, 1000, 10000]
+        for C in [0.1, 1, 10, 100, 1000]
             model = ["svm", ker, C, 3., 2];
             results = trainOther(model, inputs, targets, numFolds, metrics);
             push!(topo, [ker, C]);
             push!(finals, results);
+            println(ker * " " * C)
         end;
     end;
     return topo, finals;

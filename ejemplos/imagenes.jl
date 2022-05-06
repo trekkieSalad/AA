@@ -8,8 +8,8 @@ using Images
 ######################################################################################################################
 # Caracteristicas morfologicas de imagenes o partes de imagenes:
 # Cargamos la imagen
-imagen = load(pwd() * "/ejemplos/gg (1).jpg"); display(imagen);
-#imagen = load(pwd() * "/ejemplos/m1(173).jpg"); display(imagen);
+imagen = load(pwd() * "/ejemplos/gg (246).jpg"); display(imagen);
+#imagen = load(pwd() * "/ejemplos/image(150).jpg"); display(imagen);
 image=convert(Array{Float64,2}, gray.(Gray.(imagen)))
 img_gray = @. Gray(0.8 * Gray.(imagen) > 0.7);
 img_morphograd = morpholaplace(img_gray)
@@ -21,8 +21,9 @@ mayores = image .> 0.5;
 menores = image .< 0.5;
 #mio = Gray.(normalizeInputs(broadcast(abs, (image .+ (reverse(image, dims=2) .* mayores) .- (1 .- reverse(image, dims=2) .* menores)))));
 #mio = Gray.(normalizeInputs(broadcast(abs, (image .+ (image .* mayores) .- (1 .- image .* menores)))));
-mio = Gray.(normalizeInputs(broadcast(abs, (image .- reverse(image, dims=1)))));
-display(mio);
+#mio = Gray.(normalizeInputs(broadcast(abs, (image .- reverse(image, dims=1)))));
+#display(mio);
+#save(pwd() * "/ejemplos/difno3.jpg", mio);
 
 sleep(2)
 
@@ -31,8 +32,8 @@ sleep(2)
 #  Aquellos cuyo valor de rojo es superior en cierta cantidad al valor de verde y azul
 # Definimos en que cantidad queremos que sea mayor
 canalGris=Gray.(imagen);
-#matrizBooleana = canalGris .> 0.5;
-matrizBooleana = gray.(img_morphograd) .> 0.0;
+matrizBooleana = canalGris .> 0.5;
+#matrizBooleana = gray.(img_morphograd) .> 0.0;
 # Mostramos esta matriz booleana para ver que objetos ha encontrado
 sleep(2);
 display(Gray.(matrizBooleana));
@@ -55,11 +56,11 @@ centroides = ImageMorphology.component_centroids(labelArray);
 # Calculamos los tamaños
 tamanos = component_lengths(labelArray);
 # Que etiquetas son de objetos demasiado pequeños (30 pixeles o menos):
-etiquetasEliminar = findall(tamanos .<= 30) .- 1; # Importate el -1, porque la primera etiqueta es la 0
+etiquetasEliminar = findmax(tamanos); # Importate el -1, porque la primera etiqueta es la 0
 # Se construye otra vez la matriz booleana, a partir de la matriz de etiquetas, pero eliminando las etiquetas indicadas
 # Para hacer esto, se hace un bucle sencillo en el que se itera por cada etiqueta
 #  Esto se realiza de forma sencilla con la siguiente linea
-matrizBooleana = [!in(etiqueta,etiquetasEliminar) && (etiqueta!=0) for etiqueta in labelArray];
+matrizBooleana = [in(etiqueta,etiquetasEliminar) && (etiqueta!=0) for etiqueta in labelArray];
 sleep(2);
 display(Gray.(matrizBooleana));
 
@@ -73,7 +74,7 @@ println("Se han detectado $(maximum(labelArray)) objetos rojos grandes")
 # Por tanto, hay que construir una imagen en color:
 imagenObjetos = RGB.(matrizBooleana, matrizBooleana, matrizBooleana);
 # Calculamos los centroides, y nos saltamos el primero (el elemento "0"):
-centroides = ImageMorphology.component_centroids(labelArray)[2:end];
+centroides = ImageMorphology.component_centroids(labelArray)[2];
 # Para cada centroide, ponemos su situacion en color rojo
 for centroide in centroides
     println(centroide);

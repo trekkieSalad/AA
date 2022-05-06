@@ -1,11 +1,12 @@
 function imageToColorArray(image::Array)
-    image2 = withInversion(image);
+    #image2 = withInversion(image);
     matrix = Array{Float64,2}(undef,1,4)
     matrix[1] = mean(convert(Array{Float64,2}, gray.(Gray.(image))));
     matrix[2] = std(convert(Array{Float64,2}, gray.(Gray.(image))));
 
-    matrix[3] = mean(convert(Array{Float64,2}, gray.(Gray.(image2))));
-    matrix[4] = std(convert(Array{Float64,2}, gray.(Gray.(image2))));
+    centroide = getCentroide(image)
+    matrix[3] = centroide[1];
+    matrix[4] = centroide[2];
 
     return matrix;
 end;

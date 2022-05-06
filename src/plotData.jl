@@ -3,10 +3,10 @@ function  plotMeanStd( data::DataFrame )
     tumors = grupos[(target = true,)];
     no_tumors = grupos[(target = false,)];
 
-    xt = tumors[:,1]
-    yt = tumors[:,2]
-    xn = no_tumors[:,1]
-    yn = no_tumors[:,2]
+    xt = tumors[:,3]
+    yt = tumors[:,4]
+    xn = no_tumors[:,3]
+    yn = no_tumors[:,4]
     
     Plots.scatter(xt,yt, color="red", label="Tumores")
     Plots.scatter!(xn,yn, color="blue", label="No Tumores")

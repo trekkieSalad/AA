@@ -159,33 +159,39 @@ function execute()
 
     cabecera();
 
-    topo, resultsByFold, results = trainAllRNA(inputs,outputs,metrics,trainIterations=iter, numFolds=folds, maxCycle=maxCycles, earlyStoppingEpochs=early, minLoss=0.0, learningRate=ratio, rnaLayers=topologies)
+    #topo, resultsByFold, results = trainAllRNA(inputs,outputs,metrics,trainIterations=iter, numFolds=folds, maxCycle=maxCycles, earlyStoppingEpochs=early, minLoss=0.0, learningRate=ratio, rnaLayers=topologies)
 
     cabecera();
 
-    resultsToFile(results, resultsByFold, topo, metrics, "rna.txt");
+    #resultsToFile(results, resultsByFold, topo, metrics, "rna.txt");
 
-    if bests == "y"
-        finalTopos, finalResultsByFold, finalResults = getNBests(n, topo, resultsByFold, results, eMetrics, metrics);
-        resultsToFile(finalResults, finalResultsByFold, finalTopos, metrics, "bestsRna.txt");
-    end;
+    #if bests == "y"
+    #    finalTopos, finalResultsByFold, finalResults = getNBests(n, topo, resultsByFold, results, eMetrics, metrics);
+    #    resultsToFile(finalResults, finalResultsByFold, finalTopos, metrics, "bestsRna.txt");
+    #end;
 
-    trees, resultTrees = trainTree(otherInputs, otherOutputs, folds, metrics);
-    neigs, resultNeigs = trainNeig(otherInputs, otherOutputs, folds, metrics);
+    #println("calculando")
+    #trees, resultTrees = trainTree(otherInputs, otherOutputs, folds, metrics);
+    #println("trees")
+    #resultsToFile(resultTrees, [], trees, metrics, "trees.txt");
+    #println("trees")
+    #neigs, resultNeigs = trainNeig(otherInputs, otherOutputs, folds, metrics);
+    #println("neigs")
+    #resultsToFile(resultNeigs, [], neigs, metrics, "neigs.txt");
+    #println("neigs")
     svcs, resultSVCs = trainSVC(otherInputs, otherOutputs, folds, metrics);
-
-    resultsToFile(resultTrees, [], trees, metrics, "trees.txt");
-    resultsToFile(resultNeigs, [], neigs, metrics, "neigs.txt");
+    println("svm")
     resultsToFile(resultSVCs, [], svcs, metrics, "svms.txt");
+    println("svm")
 
-    if bests == "y"
-        finalTrees, finalResultsByFold, finalResultsTrees = getNBests(n, trees, [], resultTrees, eMetrics, metrics);
-        finalNeigs, finalResultsByFold, finalResultsNeigs = getNBests(n, neigs, [], resultNeigs, eMetrics, metrics);
-        finalSvcs, finalResultsByFold, finalResultsSvcs = getNBests(n, svcs, [], resultSVCs, eMetrics, metrics);
-
-        resultsToFile(finalResultsTrees, [], finalTrees, metrics, "bestsTrees.txt");
-        resultsToFile(finalResultsNeigs, [], finalNeigs, metrics, "bestsNeigs.txt");
-        resultsToFile(finalResultsSvcs, [], finalSvcs, metrics, "bestsSvms.txt");
-    end;
+    #if bests == "y"
+    #    finalTrees, finalResultsByFold, finalResultsTrees = getNBests(n, trees, [], resultTrees, eMetrics, metrics);
+    #    finalNeigs, finalResultsByFold, finalResultsNeigs = getNBests(n, neigs, [], resultNeigs, eMetrics, metrics);
+    #    finalSvcs, finalResultsByFold, finalResultsSvcs = getNBests(n, svcs, [], resultSVCs, eMetrics, metrics);
+#
+    #    resultsToFile(finalResultsTrees, [], finalTrees, metrics, "bestsTrees.txt");
+    #    resultsToFile(finalResultsNeigs, [], finalNeigs, metrics, "bestsNeigs.txt");
+    #    resultsToFile(finalResultsSvcs, [], finalSvcs, metrics, "bestsSvms.txt");
+    #end;
 
 end;
