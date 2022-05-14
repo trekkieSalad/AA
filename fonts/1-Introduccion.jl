@@ -2,7 +2,7 @@ using FileIO;
 using DelimitedFiles;
 using Statistics;
 
-function codCategorica(feature::Array{Any,1}, classes::Array{Any,1})
+function codCategorica(feature::AbstractArray{<:Any,1}, classes::AbstractArray{<:Any,1})
     @assert(all([in(value, classes) for value in feature]));
     numClasses = length(classes);
     @assert(numClasses>1)
@@ -19,8 +19,8 @@ function codCategorica(feature::Array{Any,1}, classes::Array{Any,1})
     return oneHot;
 end;
 
-codCategorica(feature::Array{Any,1}) = codCategorica(feature::Array{Any,1}, unique(feature));
-codCategorica(feature::Array{Bool,1}) = feature;
+codCategorica(feature::AbstractArray{<:Any,1}) = codCategorica(feature::AbstractArray{<:Any,1}, unique(feature));
+codCategorica(feature::AbstractArray{Bool,1}) = feature;
 
 function valuesOf(m::Array{Float64,2})
     min = minimum(m, dims=1);
@@ -30,16 +30,16 @@ function valuesOf(m::Array{Float64,2})
     return min, max, media, desviacion;
 end;
 
-function normalizeData(inputs::Array{Float64,2}, inRow=false)
-    min = minimum(inputs, dims = 1+inRow);
-    max = maximum(inputs, dims = 1+inRow);
+function normalizeData(inputs::Array{Float64,2}, inRow=true)
+    min = minimum(inputs, dims = (inRow ? 1 : 2));
+    max = maximum(inputs, dims = (inRow ? 1 : 2));
     inputs .-= min;
     inputs ./= (max .- min);
 
     if (inRow)
-        inputs[vec(min.==max), :] .= 0;
-    else
         inputs[:, vec(min.==max)] .= 0;
+    else
+        inputs[vec(min.==max), :] .= 0;
     end
     return inputs;
 end;
