@@ -11,7 +11,7 @@ function loadFolderImages(folderName::String)
     for fileName in readdir(folderName)
         if isImageExtension(fileName)
             image = load(string(folderName, "/", fileName));
-            image = imresize(image, (200, 200));
+            image = imresize(image, (50, 50));
             image = convert(Array{Float32, 2}, gray.(Gray.(image)));
             push!(images, image);
         end;
@@ -31,16 +31,16 @@ targets = [trues(length(positives)); falses(length(negatives))];
 
 train_imgs = inputs[trainInd];
 test_imgs = inputs[testInd];
-train_targets = targets[trainInd];
-test_targets = targets[testInd];
+train_targets = targets[trainInd]';
+test_targets = targets[testInd]';
 
 
 function convertirArrayImagenesHWCN(imagenes)
     numPatrones = length(imagenes);
     #println(length(imagenes));
-    nuevoArray = Array{Float32,4}(undef, 200, 200, 1, numPatrones); # Importante que sea un array de Float32
+    nuevoArray = Array{Float32,4}(undef, 50, 50, 1, numPatrones); # Importante que sea un array de Float32
     for i in 1:numPatrones
-        @assert (size(imagenes[i])==(200,200)) "Las imagenes no tienen tamaño 28x28";
+        @assert (size(imagenes[i])==(50,50)) "Las imagenes no tienen tamaño 28x28";
         nuevoArray[:,:,1,i] .= imagenes[i][:,:];
     end;
     return nuevoArray;
@@ -48,8 +48,8 @@ end;
 train_imgs = convertirArrayImagenesHWCN(train_imgs);
 test_imgs = convertirArrayImagenesHWCN(test_imgs);
 
-println("Tamaño de la matriz de entrenamiento: ", size(train_imgs))
-println("Tamaño de la matriz de test:          ", size(test_imgs))
+println("Tamaño de la matriz de entrenamiento: ", size(train_imgs), " ", size(train_targets));
+println("Tamaño de la matriz de test:          ", size(test_imgs), " ", size(test_targets));
 
 
 # Cuidado: en esta base de datos las imagenes ya estan con valores entre 0 y 1
@@ -73,21 +73,20 @@ funcionTransferenciaCapasConvolucionales = relu;
 # Definimos la red con la funcion Chain, que concatena distintas capas
 ann = Chain(
 
-    Conv((3, 3), 1=>16, pad=(1,1), funcionTransferenciaCapasConvolucionales),
+    Conv((3, 3), 1=>8, pad=(1,1), funcionTransferenciaCapasConvolucionales),
+    MaxPool((2,2)),
+    Conv((3, 3), 8=>16, pad=(1,1), funcionTransferenciaCapasConvolucionales),
     MaxPool((2,2)),
     Conv((3, 3), 16=>32, pad=(1,1), funcionTransferenciaCapasConvolucionales),
     MaxPool((2,2)),
-    Conv((3, 3), 32=>32, pad=(1,1), funcionTransferenciaCapasConvolucionales),
-    MaxPool((2,2)),
     x -> reshape(x, :, size(x, 4)),
-    Dense(20000, 1)
-
+    Dense(1152, 1, σ),
+    softmax
 )
 
 
 
 numImagenEnEseBatch = [1,85];
-println(typeof(train_set[1][:,:,:,numImagenEnEseBatch]));
 entradaCapa = train_set[1][:,:,:,numImagenEnEseBatch];
 numCapas = length(params(ann));
 println("La RNA tiene ", numCapas, " capas:");
@@ -103,28 +102,15 @@ end
 
 ann(train_set[1][:,:,:,numImagenEnEseBatch]);
 
+loss(x, y) = Losses.binarycrossentropy(ann(x),y);;
 
-
-
-# Definimos la funcion de loss de forma similar a las prácticas de la asignatura
-loss(x, y) = (size(y,1) == 1) ? Losses.binarycrossentropy(ann(x),y) : Losses.crossentropy(ann(x),y);
-# Para calcular la precisión, hacemos un "one cold encoding" de las salidas del modelo y de las salidas deseadas, y comparamos ambos vectores
 accuracy(batch) = mean(onecold(ann(batch[1])) .== batch[2]);
-# Un batch es una tupla (entradas, salidasDeseadas), asi que batch[1] son las entradas, y batch[2] son las salidas deseadas
 
-
-# Mostramos la precision antes de comenzar el entrenamiento:
-#  train_set es un array de batches
-#  accuracy recibe como parametro un batch
-#  accuracy.(train_set) hace un broadcast de la funcion accuracy a todos los elementos del array train_set
-#   y devuelve un array con los resultados
-#  Por tanto, mean(accuracy.(train_set)) calcula la precision promedia
-#   (no es totalmente preciso, porque el ultimo batch tiene menos elementos, pero es una diferencia baja)
 println("Ciclo 0: Precision en el conjunto de entrenamiento: ", 100*mean(accuracy(train_set)), " %");
 
 
 # Optimizador que se usa: ADAM, con esta tasa de aprendizaje:
-opt = ADAM(0.001);
+opt = ADAM(0.01);
 
 
 println("Comenzando entrenamiento...")
@@ -133,16 +119,13 @@ criterioFin = false;
 numCiclo = 0;
 numCicloUltimaMejora = 0;
 mejorModelo = nothing;
-println(typeof(train_set))
 
 while (!criterioFin)
 
-    # Hay que declarar las variables globales que van a ser modificadas en el interior del bucle
     global numCicloUltimaMejora, numCiclo, mejorPrecision, mejorModelo, criterioFin;
 
     # Se entrena un ciclo
     Flux.train!(loss, params(ann), [(train_set[1], train_set[2])], opt);
-    #Flux.train!(loss, params(rna), [(trainInputs, trainTargets)], ADAM(learningRate));
 
     numCiclo += 1;
 
@@ -151,7 +134,7 @@ while (!criterioFin)
     println("Ciclo ", numCiclo, ": Precision en el conjunto de entrenamiento: ", 100*precisionEntrenamiento, " %");
 
     # Si se mejora la precision en el conjunto de entrenamiento, se calcula la de test y se guarda el modelo
-    if (precisionEntrenamiento >= mejorPrecision)
+    if (precisionEntrenamiento > mejorPrecision)
         mejorPrecision = precisionEntrenamiento;
         precisionTest = accuracy(test_set);
         println("   Mejora en el conjunto de entrenamiento -> Precision en el conjunto de test: ", 100*precisionTest, " %");
