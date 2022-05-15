@@ -6,6 +6,4 @@
 
 4.- Introducir los parametros conforme los vaya pidiendo.
 
-5.- Seleccionar numero de elementos en el top 
-
-6.- Se generarán entre 4 y 8 ficheros con los resultados.
+5.- Se generarán 4 ficheros con los resultados.
