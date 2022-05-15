@@ -1,0 +1,1 @@
+Para la ejeucion de los ficheros de practicas solo debes ejecutar el fichero install.jl, acto seguido ejecuta la funcion execute() y sigue las indicaciones.
