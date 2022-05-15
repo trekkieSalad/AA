@@ -35,7 +35,6 @@ validationRatio = 0.2;
 maxEpochsVal = 6;
 numRepetitionsAANTraining = 50;
 
-# Cargamos el dataset
 dataset = readdlm("fonts/iris.data",',');
 inputs = convert(Array{Float64,2}, dataset[:,1:4]);
 targets = dataset[:,5];
@@ -49,10 +48,8 @@ targets=oneHotEncoding(targets);
 testAccuracies = Array{Float64,1}(undef, numFolds);
 testF1         = Array{Float64,1}(undef, numFolds);
 
-# Para cada fold, entrenamos
 for numFold in 1:numFolds
 
-    # Dividimos los datos en entrenamiento y test
     local trainingInputs, testInputs, trainingTargets, testTargets;
     trainingInputs    = inputs[crossValidationIndices.!=numFold,:];
     testInputs        = inputs[crossValidationIndices.==numFold,:];

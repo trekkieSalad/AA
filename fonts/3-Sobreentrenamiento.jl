@@ -27,7 +27,7 @@ end;
 #--------------------------------------------------------------------------
 
 function trainClassANN(topology::Array{Int64,1},train::Tuple{AbstractArray{<:Real,2},AbstractArray{Bool,2}},val::Tuple{AbstractArray{<:Real,2},AbstractArray{Bool,2}},test::Tuple{AbstractArray{<:Real,2},AbstractArray{Bool,2}};
-    maxEpochs::Int64=1000, minLoss::Float64=0.0, learningRate::Float64=0.1, maxEpochsVal::Int64=100)
+    maxEpochs::Int64=1000, minLoss::Float64=0.0, learningRate::Float64=0.1, maxEpochsVal::Int64=10)
 
     trainingInputs = train[1];
     trainingTargets = train[2];
@@ -105,12 +105,10 @@ function trainClassANN(topology::Array{Int64,1},train::Tuple{AbstractArray{<:Rea
         push!(trainingAccuracies,   Acc[1]);
         push!(testLosses,           allLosses[2]);
         push!(testAccuracies,       Acc[2]);
-        
 
         if withVal
             push!(validationLosses,     allLosses[3]);
             push!(validationAccuracies, Acc[3]);
-            bestValidationLoss = allLosses[3];
             if (allLosses[3]<bestValidationLoss)
                 bestValidationLoss = allLosses[3];
                 numEpochsValidation = 0;
@@ -148,4 +146,4 @@ train    = (inputs[trainingIndices,:], targets[trainingIndices,:]);
 val      = (inputs[validationIndices,:], targets[validationIndices,:]);
 test     = (inputs[testIndices,:], targets[testIndices,:]);
 
-(ann, trainingLosses, trainingAccuracies) = trainClassANN(topology,train,val,test,maxEpochs=10000, minLoss=0.01, learningRate=0.1, maxEpochsVal=250);
+(ann, trainingLosses, trainingAccuracies) = trainClassANN(topology,train,val,test,maxEpochs=500, minLoss=0.01, learningRate=0.1, maxEpochsVal=10);
