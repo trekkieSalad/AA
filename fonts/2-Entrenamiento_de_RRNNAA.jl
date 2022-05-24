@@ -73,9 +73,9 @@ function normalizeZeroMean!(data::AbstractArray{<:Real,2}, normalizationParamete
 end;
 
 function normalizeZeroMean(data::AbstractArray{<:Real,2}, normalizationParameters::NTuple{2, AbstractArray{<:Real,2}}; inRows=true)
-    newDataset = copy(data);
-    normalizeZeroMean!(newDataset, normalizationParameters; inRows=inRows);
-    return newDataset;
+    nuevo = copy(data);
+    normalizeZeroMean!(nuevo, normalizationParameters; inRows=inRows);
+    return nuevo;
 end;
 
 normalizeZeroMean!(data::AbstractArray{<:Real,2}; inRows=true) = normalizeZeroMean!(data, calculateZeroMeanNormalizationParameters(data; inRows=inRows); inRows=inRows);
@@ -92,10 +92,10 @@ function classifyOutputs(outputs::AbstractArray{<:Real,2}; threshold::Float64=0.
         return convert(Array{Bool,2}, outputs.>=threshold);
     else
         (_,indicesMaxEachInstance) = findmax(outputs, dims= 2);
-        outputsBoolean = Array{Bool,2}(falses(size(outputs)));
-        outputsBoolean[indicesMaxEachInstance] .= true;
-        @assert(all(sum(outputsBoolean, dims=2).==1));
-        return outputsBoolean;
+        outputsBool = Array{Bool,2}(falses(size(outputs)));
+        outputsBool[indicesMaxEachInstance] .= true;
+        @assert(all(sum(outputsBool, dims=2).==1));
+        return outputsBool;
     end;
 end;
 
@@ -126,12 +126,6 @@ function accuracy(outputs::AbstractArray{<:Real,2}, targets::AbstractArray{Bool,
         return accuracy(classifyOutputs(outputs), targets);
     end;
 end;
-
-# Añado estas funciones porque las RR.NN.AA. dan la salida como matrices de valores Float32 en lugar de Float64
-# Con estas funciones se pueden usar indistintamente matrices de Float32 o Float64
-accuracy(outputs::Array{Float32,1}, targets::Array{Bool,1}; threshold::Float64=0.5) = accuracy(Float64.(outputs), targets; threshold=threshold);
-accuracy(outputs::Array{Float32,2}, targets::Array{Bool,2}; dataInRows::Bool=true)  = accuracy(Float64.(outputs), targets; dataInRows=dataInRows);
-
 #--------------------------------------------------------------------------
 #                         BUILDRNA
 #--------------------------------------------------------------------------

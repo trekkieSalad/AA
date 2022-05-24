@@ -123,10 +123,8 @@ end;
 
 
 # -------------------------------------------------------------------------
-# Ejemplo de uso de estas funciones, con conjuntos de entrenamiento, validacion y test:
 
-
-topology = [4, 3];
+topology = [3, 2];
 learningRate = 0.01;
 numMaxEpochs = 1000;
 validationRatio = 0.2;
